@@ -6,18 +6,17 @@
     <title>Lesson 10 Portal - Being Different Is Beautiful</title>
     
     <!-- ホーム画面用アイコン設定 -->
-    <!-- iPad/iPhoneはHTML埋め込みではなく、実際のファイルを読みに行く動作を好むため、ファイル名を指定 -->
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
     
-    <!-- Tailwind CSS (スタイリング用) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM (基本ライブラリ) -->
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel (ブラウザでReactを動かすための変換ツール) -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
@@ -32,7 +31,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- アイコンコンポーネント (Lucide IconsのSVG実装) ---
+        // --- アイコンコンポーネント ---
         const IconMic = ({ size = 24, className = "" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         );
@@ -75,15 +74,37 @@
             text: '#1e293b'
           };
 
+          // スコアデータの状態管理
           const [scores, setScores] = useState({
             1: { label: "Words Perfect", value: "12/20", isNew: true },
             2: null,
-            3: { label: "Best Time", value: "45s", isNew: false },
+            // 並べ替えは複数の情報を表示するため、オブジェクトではなく文字列で整形するか、レンダリング時に工夫します
+            // ここでは表示用の文字列としてセットしています
+            3: { label: "Record", value: "High:1500 / Lv.5 / 達人", isNew: false, isComplex: true }, 
             4: { label: "High Score", value: "1,200", isNew: false }
           });
 
           useEffect(() => {
-            // localStorageなどからの読み込み処理をここに記述
+            // 他のアプリが同じドメインにある場合、localStorageからデータを読み込むことが可能です。
+            // 以下のコードは実装例です。
+            
+            /*
+            const grammarScore = localStorage.getItem('grammar_highscore'); // 例: "1500"
+            const grammarLevel = localStorage.getItem('grammar_level');     // 例: "5"
+            const grammarTitle = localStorage.getItem('grammar_title');     // 例: "Master"
+            
+            if (grammarScore) {
+                setScores(prev => ({
+                    ...prev,
+                    3: { 
+                        label: "Record", 
+                        value: `High:${grammarScore} / Lv.${grammarLevel} / ${grammarTitle}`, 
+                        isNew: false,
+                        isComplex: true
+                    }
+                }));
+            }
+            */
           }, []);
 
           const apps = [
@@ -91,7 +112,7 @@
               id: 1,
               title: "Pronunciation Practice",
               sub: "発音練習",
-              desc: "本文の正しい発音をマスターしよう。AIによる判定機能付き。",
+              desc: "正しい発音をマスターしよう。AIによる判定機能付き。",
               icon: <IconMic size={32} />,
               url: "https://sagamienglish.github.io/L10Pronunciation/",
               color: "bg-blue-500",
@@ -101,7 +122,7 @@
               id: 2,
               title: "Vocabulary Guessing",
               sub: "語彙クイズ",
-              desc: "文脈から単語の意味を推測するゲーム。Part 1-3の重要語句をカバー。",
+              desc: "単語のつづりを推測するゲーム。Part 1-3の重要語句をカバー。",
               icon: <IconHelpCircle size={32} />,
               url: "https://sagamienglish.github.io/wordgame202601/",
               color: "bg-amber-500",
@@ -111,7 +132,7 @@
               id: 3,
               title: "Grammar Scramble",
               sub: "文法並べ替え",
-              desc: "仮定法 (Subjunctive Mood) などの重要構文を並べ替えで定着。",
+              desc: "重要構文を並べ替えで定着。",
               icon: <IconShuffle size={32} />,
               url: "https://sagamienglish.github.io/narabekaetrial/",
               color: "bg-emerald-500",
@@ -121,7 +142,7 @@
               id: 4,
               title: "Word Hockey",
               sub: "単語ホッケー",
-              desc: "スリル満点の対戦型ゲームで単語を覚えよう。反射神経も大切！",
+              desc: "エアホッケーのようなゲームで単語を覚えよう。反射神経も大切！",
               icon: <IconGamepad2 size={32} />,
               url: "https://sagamienglish.github.io/wordhockeypo1L10/",
               color: "bg-rose-500",
@@ -206,10 +227,14 @@
                       <div className="p-6 flex-grow flex flex-col relative">
                         {/* Score Badge */}
                         {scores[app.id] && (
-                           <div className="absolute -top-3 right-4 bg-white border border-slate-100 shadow-sm rounded-full px-3 py-1 text-xs font-bold text-slate-600 flex items-center gap-1 z-10">
-                             <IconTrophy size={12} className="text-yellow-500" />
-                             <span className="text-[10px] uppercase text-slate-400 mr-1 ml-1">{scores[app.id].label}:</span>
-                             <span className="text-slate-800">{scores[app.id].value}</span>
+                           <div className={`absolute -top-3 right-4 bg-white border border-slate-100 shadow-sm rounded-full px-3 py-1 text-xs font-bold text-slate-600 flex items-center gap-1 z-10 ${scores[app.id].isComplex ? 'max-w-[90%]' : ''}`}>
+                             <IconTrophy size={12} className="text-yellow-500 flex-shrink-0" />
+                             {!scores[app.id].isComplex && (
+                                <span className="text-[10px] uppercase text-slate-400 mr-1 ml-1 whitespace-nowrap">{scores[app.id].label}:</span>
+                             )}
+                             <span className={`text-slate-800 ${scores[app.id].isComplex ? 'ml-1 text-[10px]' : ''}`}>
+                                {scores[app.id].value}
+                             </span>
                            </div>
                         )}
 
