@@ -1,191 +1,265 @@
-import React, { useState, useEffect } from 'react';
-import { Mic, Gamepad2, Shuffle, HelpCircle, Camera, ArrowRight, BookOpen, Layers, Trophy, Star } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 10 Portal - Being Different Is Beautiful</title>
+    
+    <!-- Tailwind CSS (スタイリング用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (基本ライブラリ) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (ブラウザでReactを動かすための変換ツール) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-const Lesson10Portal = () => {
-  const [hoveredCard, setHoveredCard] = useState(null);
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
 
-  // 教科書のカラーパレットに近い色定義
-  const themeColors = {
-    primary: '#00a89d', // 教科書ヘッダーのティールグリーン
-    secondary: '#4abbd5', // 空の青
-    accent: '#f59e0b', // 大地や装飾のオレンジ
-    bg: '#f8fafc',
-    text: '#1e293b'
-  };
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-  // 本来は localStorage から取得するデータを想定
-  // 例: const savedScore = localStorage.getItem('L10_pronunciation_score');
-  const [scores, setScores] = useState({
-    1: { label: "Words Perfect", value: "12/20", isNew: true }, // 発音
-    2: null, // 語彙（まだプレイしていない想定）
-    3: { label: "Best Time", value: "45s", isNew: false }, // 並べ替え
-    4: { label: "High Score", value: "1,200", isNew: false }  // ホッケー
-  });
+        // --- アイコンコンポーネント (Lucide IconsのSVG実装) ---
+        const IconMic = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        );
+        const IconGamepad2 = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+        );
+        const IconShuffle = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l14.2-12.6"/><path d="M22 18h-1.4c-1.3 0-2.5-.6-3.3-1.7L13.1 11"/><path d="m2 6 2.8 2.5"/><path d="m22 6-2.8 2.5"/><path d="M16 18l6-6-6-6"/></svg> // Simplified representation
+        );
+        const IconHelpCircle = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        );
+        const IconCamera = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        );
+        const IconArrowRight = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        );
+        const IconBookOpen = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        );
+        const IconLayers = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        );
+        const IconTrophy = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
+        const IconGlobe = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        );
 
-  const apps = [
-    {
-      id: 1,
-      title: "Pronunciation Practice",
-      sub: "発音練習",
-      desc: "本文の正しい発音をマスターしよう。AIによる判定機能付き。",
-      icon: <Mic size={32} />,
-      url: "https://sagamienglish.github.io/L10Pronunciation/",
-      color: "bg-blue-500",
-      gradient: "from-blue-400 to-blue-600"
-    },
-    {
-      id: 2,
-      title: "Vocabulary Guessing",
-      sub: "語彙クイズ",
-      desc: "文脈から単語の意味を推測するゲーム。Part 1-3の重要語句をカバー。",
-      icon: <HelpCircle size={32} />,
-      url: "https://sagamienglish.github.io/wordgame202601/",
-      color: "bg-amber-500",
-      gradient: "from-amber-400 to-amber-600"
-    },
-    {
-      id: 3,
-      title: "Grammar Scramble",
-      sub: "文法並べ替え",
-      desc: "仮定法 (Subjunctive Mood) などの重要構文を並べ替えで定着。",
-      icon: <Shuffle size={32} />,
-      url: "https://sagamienglish.github.io/narabekaetrial/",
-      color: "bg-emerald-500",
-      gradient: "from-emerald-400 to-emerald-600"
-    },
-    {
-      id: 4,
-      title: "Word Hockey",
-      sub: "単語ホッケー",
-      desc: "スリル満点の対戦型ゲームで単語を覚えよう。反射神経も大切！",
-      icon: <Gamepad2 size={32} />,
-      url: "https://sagamienglish.github.io/wordhockeypo1L10/",
-      color: "bg-rose-500",
-      gradient: "from-rose-400 to-rose-600"
-    }
-  ];
+        const Lesson10Portal = () => {
+          const [hoveredCard, setHoveredCard] = useState(null);
 
-  return (
-    <div className="min-h-screen font-sans text-slate-800" style={{ backgroundColor: themeColors.bg }}>
-      
-      {/* Header Section mimicking the Textbook Style */}
-      <header className="relative overflow-hidden text-white shadow-lg" style={{ backgroundColor: themeColors.primary }}>
-        {/* Decorative background elements */}
-        <div className="absolute top-0 left-0 w-full h-2 border-b-2 border-dashed border-white/30"></div>
-        <div className="absolute -right-10 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -left-10 bottom-0 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
+          const themeColors = {
+            primary: '#00a89d',
+            secondary: '#4abbd5',
+            accent: '#f59e0b',
+            bg: '#f8fafc',
+            text: '#1e293b'
+          };
 
-        <div className="max-w-6xl mx-auto px-4 py-12 relative z-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div>
-              <div className="inline-block px-3 py-1 mb-3 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 font-bold tracking-widest text-sm shadow-sm">
-                LESSON 10
-              </div>
-              <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-2 leading-tight">
-                Being Different <br/>
-                <span className="text-yellow-300">Is Beautiful</span>
-              </h1>
-              <p className="text-lg md:text-xl text-teal-50 opacity-90 font-light flex items-center gap-2">
-                <Camera size={20} />
-                The World of Nagi Yoshida & African Tribes
-              </p>
-            </div>
-            
-            {/* Textbook Goal Summary Badge */}
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 max-w-xs hidden md:block">
-              <h3 className="font-bold border-b border-white/30 pb-1 mb-2 flex items-center gap-2">
-                <BookOpen size={16} /> Goals
-              </h3>
-              <ul className="text-sm space-y-1 opacity-90">
-                <li>• Listening to interviews</li>
-                <li>• Reading about Nagi's life</li>
-                <li>• Expressing opinions on diversity</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </header>
+          // 将来的にlocalStorageからデータを取得する想定
+          const [scores, setScores] = useState({
+            1: { label: "Words Perfect", value: "12/20", isNew: true },
+            2: null,
+            3: { label: "Best Time", value: "45s", isNew: false },
+            4: { label: "High Score", value: "1,200", isNew: false }
+          });
 
-      {/* Main Content Area */}
-      <main className="max-w-6xl mx-auto px-4 py-12">
-        
-        {/* App Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {apps.map((app) => (
-            <a 
-              key={app.id}
-              href={app.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full transform hover:-translate-y-1"
-              onMouseEnter={() => setHoveredCard(app.id)}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              {/* Card Header Gradient */}
-              <div className={`h-24 ${app.color} bg-gradient-to-br ${app.gradient} flex items-center justify-center relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                {/* Decorative circles */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 bg-white/20 rounded-full"></div>
+          useEffect(() => {
+            // ここでlocalStorageから実際のスコアを読み込む処理を追加可能
+            // const loadScores = () => { ... }
+          }, []);
+
+          const apps = [
+            {
+              id: 1,
+              title: "Pronunciation Practice",
+              sub: "発音練習",
+              desc: "本文の正しい発音をマスターしよう。AIによる判定機能付き。",
+              icon: <IconMic size={32} />,
+              url: "https://sagamienglish.github.io/L10Pronunciation/",
+              color: "bg-blue-500",
+              gradient: "from-blue-400 to-blue-600"
+            },
+            {
+              id: 2,
+              title: "Vocabulary Guessing",
+              sub: "語彙クイズ",
+              desc: "文脈から単語の意味を推測するゲーム。Part 1-3の重要語句をカバー。",
+              icon: <IconHelpCircle size={32} />,
+              url: "https://sagamienglish.github.io/wordgame202601/",
+              color: "bg-amber-500",
+              gradient: "from-amber-400 to-amber-600"
+            },
+            {
+              id: 3,
+              title: "Grammar Scramble",
+              sub: "文法並べ替え",
+              desc: "仮定法 (Subjunctive Mood) などの重要構文を並べ替えで定着。",
+              icon: <IconShuffle size={32} />,
+              url: "https://sagamienglish.github.io/narabekaetrial/",
+              color: "bg-emerald-500",
+              gradient: "from-emerald-400 to-emerald-600"
+            },
+            {
+              id: 4,
+              title: "Word Hockey",
+              sub: "単語ホッケー",
+              desc: "スリル満点の対戦型ゲームで単語を覚えよう。反射神経も大切！",
+              icon: <IconGamepad2 size={32} />,
+              url: "https://sagamienglish.github.io/wordhockeypo1L10/",
+              color: "bg-rose-500",
+              gradient: "from-rose-400 to-rose-600"
+            }
+          ];
+
+          return (
+            <div className="min-h-screen font-sans text-slate-800" style={{ backgroundColor: themeColors.bg }}>
+              
+              {/* Header Section */}
+              <header className="relative overflow-hidden text-white shadow-lg" style={{ backgroundColor: themeColors.primary }}>
+                <div className="absolute top-0 left-0 w-full h-2 border-b-2 border-dashed border-white/30"></div>
+                <div className="absolute -right-10 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="absolute -left-10 bottom-0 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
+
+                <div className="max-w-6xl mx-auto px-4 py-12 relative z-10">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div>
+                      <div className="inline-block px-3 py-1 mb-3 bg-white/20 backdrop-blur-sm rounded-lg border border-white/30 font-bold tracking-widest text-sm shadow-sm">
+                        LESSON 10
+                      </div>
+                      <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-2 leading-tight">
+                        Being Different <br/>
+                        <span className="text-yellow-300">Is Beautiful</span>
+                      </h1>
+                      <p className="text-lg md:text-xl text-teal-50 opacity-90 font-light flex items-center gap-2">
+                        <IconCamera size={20} />
+                        The World of Nagi Yoshida & African Tribes
+                      </p>
+                    </div>
+                    
+                    {/* Goals Badge */}
+                    <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 max-w-xs hidden md:block">
+                      <h3 className="font-bold border-b border-white/30 pb-1 mb-2 flex items-center gap-2">
+                        <IconBookOpen size={16} /> Goals
+                      </h3>
+                      <ul className="text-sm space-y-1 opacity-90">
+                        <li>• Listening to interviews</li>
+                        <li>• Reading about Nagi's life</li>
+                        <li>• Expressing opinions on diversity</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </header>
+
+              {/* Main Content Area */}
+              <main className="max-w-6xl mx-auto px-4 py-12">
                 
-                <div className="text-white transform group-hover:scale-110 transition-transform duration-300 drop-shadow-md">
-                  {app.icon}
+                {/* Intro Text (IconGlobe使用) */}
+                <div className="mb-12 text-center max-w-3xl mx-auto">
+                    <h2 className="text-2xl font-bold text-slate-700 mb-4 flex items-center justify-center gap-2">
+                        <IconGlobe className="text-teal-600" size={24} />
+                        Start Your Journey
+                    </h2>
+                    <p className="text-slate-600 leading-relaxed">
+                        教科書の内容をより深く理解するためのWebアプリ集です。<br className="hidden md:inline"/>
+                        発音、単語、文法、そしてゲーム。好きなものから選んで始めましょう。
+                    </p>
                 </div>
-              </div>
 
-              {/* Card Body */}
-              <div className="p-6 flex-grow flex flex-col relative">
-                {/* Score Badge (if data exists) */}
-                {scores[app.id] && (
-                   <div className="absolute -top-3 right-4 bg-white border border-slate-100 shadow-sm rounded-full px-3 py-1 text-xs font-bold text-slate-600 flex items-center gap-1 z-10">
-                     <Trophy size={12} className="text-yellow-500" />
-                     <span className="text-[10px] uppercase text-slate-400 mr-1">{scores[app.id].label}:</span>
-                     <span className="text-slate-800">{scores[app.id].value}</span>
-                   </div>
-                )}
+                {/* App Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {apps.map((app) => (
+                    <a 
+                      key={app.id}
+                      href={app.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full transform hover:-translate-y-1"
+                      onMouseEnter={() => setHoveredCard(app.id)}
+                      onMouseLeave={() => setHoveredCard(null)}
+                    >
+                      {/* Card Header Gradient */}
+                      <div className={`h-24 ${app.color} bg-gradient-to-br ${app.gradient} flex items-center justify-center relative overflow-hidden`}>
+                        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                        <div className="absolute -top-4 -right-4 w-16 h-16 bg-white/20 rounded-full"></div>
+                        
+                        <div className="text-white transform group-hover:scale-110 transition-transform duration-300 drop-shadow-md">
+                          {app.icon}
+                        </div>
+                      </div>
 
-                <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  {app.sub}
+                      {/* Card Body */}
+                      <div className="p-6 flex-grow flex flex-col relative">
+                        {/* Score Badge */}
+                        {scores[app.id] && (
+                           <div className="absolute -top-3 right-4 bg-white border border-slate-100 shadow-sm rounded-full px-3 py-1 text-xs font-bold text-slate-600 flex items-center gap-1 z-10">
+                             <IconTrophy size={12} className="text-yellow-500" />
+                             <span className="text-[10px] uppercase text-slate-400 mr-1 ml-1">{scores[app.id].label}:</span>
+                             <span className="text-slate-800">{scores[app.id].value}</span>
+                           </div>
+                        )}
+
+                        <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">
+                          {app.sub}
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-teal-600 transition-colors">
+                          {app.title}
+                        </h3>
+                        <p className="text-sm text-slate-500 mb-6 leading-relaxed flex-grow">
+                          {app.desc}
+                        </p>
+                        
+                        <div className="mt-auto flex items-center text-sm font-semibold text-teal-600 group-hover:translate-x-1 transition-transform">
+                          Play Now <IconArrowRight size={16} className="ml-1" />
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+
+                  {/* Coming Soon Card */}
+                  <div className="bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-8 min-h-[280px] text-slate-400 group hover:border-teal-400 hover:text-teal-500 transition-colors">
+                    <IconLayers size={48} className="mb-4 opacity-50 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-lg font-bold mb-1">More Coming Soon</h3>
+                    <p className="text-xs text-center">新しいアプリを追加予定です。<br/>お楽しみに！</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-3 group-hover:text-teal-600 transition-colors">
-                  {app.title}
-                </h3>
-                <p className="text-sm text-slate-500 mb-6 leading-relaxed flex-grow">
-                  {app.desc}
-                </p>
-                
-                <div className="mt-auto flex items-center text-sm font-semibold text-teal-600 group-hover:translate-x-1 transition-transform">
-                  Play Now <ArrowRight size={16} className="ml-1" />
+
+              </main>
+
+              {/* Footer */}
+              <footer className="bg-slate-800 text-slate-400 py-8 mt-12">
+                <div className="max-w-6xl mx-auto px-4 text-center">
+                  <div className="mb-4 flex justify-center space-x-4">
+                     <div className="w-2 h-2 rounded-full bg-teal-500"></div>
+                     <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                     <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                  </div>
+                  <p className="text-sm">
+                    Tokai Sagami High School &copy; {new Date().getFullYear()}
+                  </p>
                 </div>
-              </div>
-            </a>
-          ))}
+              </footer>
+            </div>
+          );
+        };
 
-          {/* Coming Soon Card */}
-          <div className="bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-8 min-h-[280px] text-slate-400 group hover:border-teal-400 hover:text-teal-500 transition-colors">
-            <Layers size={48} className="mb-4 opacity-50 group-hover:scale-110 transition-transform" />
-            <h3 className="text-lg font-bold mb-1">More Coming Soon</h3>
-            <p className="text-xs text-center">新しいアプリを追加予定です。<br/>お楽しみに！</p>
-          </div>
-        </div>
-
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-slate-800 text-slate-400 py-8 mt-12">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="mb-4 flex justify-center space-x-4">
-             {/* Decorative abstract shapes */}
-             <div className="w-2 h-2 rounded-full bg-teal-500"></div>
-             <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-             <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-          </div>
-          <p className="text-sm">
-            Tokai Sagami High School &copy; {new Date().getFullYear()}
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default Lesson10Portal;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Lesson10Portal />);
+    </script>
+</body>
+</html>
