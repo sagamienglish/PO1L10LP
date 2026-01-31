@@ -2,9 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lesson 10 Portal - Being Different Is Beautiful</title>
     
+    <!-- ホーム画面に追加した際のPWA設定（全画面表示など） -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="L10 Portal">
+
     <!-- ホーム画面用アイコン設定 -->
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" href="apple-touch-icon.png">
@@ -22,6 +27,12 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
+            /* iOSでのスクロールバウンス対策 */
+            overscroll-behavior-y: none;
+        }
+        /* タップ時のハイライトを消す */
+        * {
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -78,33 +89,18 @@
           const [scores, setScores] = useState({
             1: { label: "Words Perfect", value: "12/20", isNew: true },
             2: null,
-            // 並べ替えは複数の情報を表示するため、オブジェクトではなく文字列で整形するか、レンダリング時に工夫します
-            // ここでは表示用の文字列としてセットしています
             3: { label: "Record", value: "High:1500 / Lv.5 / 達人", isNew: false, isComplex: true }, 
             4: { label: "High Score", value: "1,200", isNew: false }
           });
 
+          // リンククリック時のハンドラー：指定された場合のみSafari（外部ブラウザ）を開く
+          const handleAppClick = (e, url) => {
+             e.preventDefault();
+             window.open(url, '_blank');
+          };
+
           useEffect(() => {
-            // 他のアプリが同じドメインにある場合、localStorageからデータを読み込むことが可能です。
-            // 以下のコードは実装例です。
-            
-            /*
-            const grammarScore = localStorage.getItem('grammar_highscore'); // 例: "1500"
-            const grammarLevel = localStorage.getItem('grammar_level');     // 例: "5"
-            const grammarTitle = localStorage.getItem('grammar_title');     // 例: "Master"
-            
-            if (grammarScore) {
-                setScores(prev => ({
-                    ...prev,
-                    3: { 
-                        label: "Record", 
-                        value: `High:${grammarScore} / Lv.${grammarLevel} / ${grammarTitle}`, 
-                        isNew: false,
-                        isComplex: true
-                    }
-                }));
-            }
-            */
+            // ローカルストレージ読み込みロジック（必要であればここに実装）
           }, []);
 
           const apps = [
@@ -116,7 +112,8 @@
               icon: <IconMic size={32} />,
               url: "https://sagamienglish.github.io/L10Pronunciation/",
               color: "bg-blue-500",
-              gradient: "from-blue-400 to-blue-600"
+              gradient: "from-blue-400 to-blue-600",
+              forceBrowser: true // iOSの音声認識制限のため、これだけはSafariで開く
             },
             {
               id: 2,
@@ -126,7 +123,8 @@
               icon: <IconHelpCircle size={32} />,
               url: "https://sagamienglish.github.io/wordgame202601/",
               color: "bg-amber-500",
-              gradient: "from-amber-400 to-amber-600"
+              gradient: "from-amber-400 to-amber-600",
+              forceBrowser: false
             },
             {
               id: 3,
@@ -136,7 +134,8 @@
               icon: <IconShuffle size={32} />,
               url: "https://sagamienglish.github.io/narabekaetrial/",
               color: "bg-emerald-500",
-              gradient: "from-emerald-400 to-emerald-600"
+              gradient: "from-emerald-400 to-emerald-600",
+              forceBrowser: false
             },
             {
               id: 4,
@@ -146,7 +145,8 @@
               icon: <IconGamepad2 size={32} />,
               url: "https://sagamienglish.github.io/wordhockeypo1L10/",
               color: "bg-rose-500",
-              gradient: "from-rose-400 to-rose-600"
+              gradient: "from-rose-400 to-rose-600",
+              forceBrowser: false
             }
           ];
 
@@ -207,8 +207,11 @@
                     <a 
                       key={app.id}
                       href={app.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      // forceBrowserがtrueの時のみ _blank、それ以外は _self（PWA内遷移）
+                      target={app.forceBrowser ? "_blank" : "_self"}
+                      rel={app.forceBrowser ? "noopener noreferrer" : undefined}
+                      // forceBrowserがtrueの時のみ、JSで強制的にSafariを開く
+                      onClick={app.forceBrowser ? (e) => handleAppClick(e, app.url) : undefined}
                       className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full transform hover:-translate-y-1"
                       onMouseEnter={() => setHoveredCard(app.id)}
                       onMouseLeave={() => setHoveredCard(null)}
@@ -269,9 +272,9 @@
               <footer className="bg-slate-800 text-slate-400 py-8 mt-12">
                 <div className="max-w-6xl mx-auto px-4 text-center">
                   <div className="mb-4 flex justify-center space-x-4">
-                     <div className="w-2 h-2 rounded-full bg-teal-500"></div>
-                     <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                     <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-teal-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-rose-500"></div>
                   </div>
                   <p className="text-sm">
                     Tokai Sagami High School &copy; {new Date().getFullYear()}
