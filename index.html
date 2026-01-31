@@ -85,23 +85,11 @@
             text: '#1e293b'
           };
 
-          // スコアデータの状態管理
-          const [scores, setScores] = useState({
-            1: { label: "Words Perfect", value: "12/20", isNew: true },
-            2: null,
-            3: { label: "Record", value: "High:1500 / Lv.5 / 達人", isNew: false, isComplex: true }, 
-            4: { label: "High Score", value: "1,200", isNew: false }
-          });
-
           // リンククリック時のハンドラー：指定された場合のみSafari（外部ブラウザ）を開く
           const handleAppClick = (e, url) => {
              e.preventDefault();
              window.open(url, '_blank');
           };
-
-          useEffect(() => {
-            // ローカルストレージ読み込みロジック（必要であればここに実装）
-          }, []);
 
           const apps = [
             {
@@ -114,6 +102,17 @@
               color: "bg-blue-500",
               gradient: "from-blue-400 to-blue-600",
               forceBrowser: true // iOSの音声認識制限のため、これだけはSafariで開く
+            },
+            {
+              id: 5, // 新しいアプリを追加
+              title: "Reading Trainer",
+              sub: "音読練習",
+              desc: "本文を正しく読めるように練習しよう。",
+              icon: <IconBookOpen size={32} />, // 既存のアイコンを使用
+              url: "https://sagamienglish.github.io/PO1L10ReadingAssist/",
+              color: "bg-indigo-500",
+              gradient: "from-indigo-400 to-indigo-600",
+              forceBrowser: true // 音読練習でマイクを使う可能性があるためSafari設定にしています
             },
             {
               id: 2,
@@ -228,18 +227,7 @@
 
                       {/* Card Body */}
                       <div className="p-6 flex-grow flex flex-col relative">
-                        {/* Score Badge */}
-                        {scores[app.id] && (
-                           <div className={`absolute -top-3 right-4 bg-white border border-slate-100 shadow-sm rounded-full px-3 py-1 text-xs font-bold text-slate-600 flex items-center gap-1 z-10 ${scores[app.id].isComplex ? 'max-w-[90%]' : ''}`}>
-                             <IconTrophy size={12} className="text-yellow-500 flex-shrink-0" />
-                             {!scores[app.id].isComplex && (
-                                <span className="text-[10px] uppercase text-slate-400 mr-1 ml-1 whitespace-nowrap">{scores[app.id].label}:</span>
-                             )}
-                             <span className={`text-slate-800 ${scores[app.id].isComplex ? 'ml-1 text-[10px]' : ''}`}>
-                                {scores[app.id].value}
-                             </span>
-                           </div>
-                        )}
+                        {/* スコア表示を削除しました */}
 
                         <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">
                           {app.sub}
